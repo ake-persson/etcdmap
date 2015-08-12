@@ -6,7 +6,7 @@ import (
 	etcd "github.com/coreos/go-etcd/etcd"
 )
 
-// EtcdMap creates a nested data structure from a Etcd node.
+// Map creates a nested data structure from a Etcd node.
 func Map(root *etcd.Node) map[string]interface{} {
 	v := make(map[string]interface{})
 
