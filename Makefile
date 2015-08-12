@@ -9,4 +9,4 @@ test: format
 	go build
 
 readme:
-	godoc2md github.com/mickep76/iodatafmt >README.md
+	godoc2md github.com/mickep76/etcdmap >README.md
