@@ -7,9 +7,9 @@
 
 
 
-## func EtcdMap
+## func Map
 ``` go
-func EtcdMap(root *etcd.Node) map[string]interface{}
+func Map(root *etcd.Node) map[string]interface{}
 ```
 EtcdMap creates a nested data structure from a Etcd node.
 

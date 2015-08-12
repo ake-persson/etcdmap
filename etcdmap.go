@@ -7,7 +7,7 @@ import (
 )
 
 // EtcdMap creates a nested data structure from a Etcd node.
-func EtcdMap(root *etcd.Node) map[string]interface{} {
+func Map(root *etcd.Node) map[string]interface{} {
 	v := make(map[string]interface{})
 
 	for _, n := range root.Nodes {
@@ -15,7 +15,7 @@ func EtcdMap(root *etcd.Node) map[string]interface{} {
 		k := keys[len(keys)-1]
 		if n.Dir {
 			v[k] = make(map[string]interface{})
-			v[k] = EtcdMap(n)
+			v[k] = Map(n)
 		} else {
 			v[k] = n.Value
 		}
