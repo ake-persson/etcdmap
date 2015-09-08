@@ -51,6 +51,23 @@ func JSONIndent(root *etcd.Node, indent string) ([]byte, error) {
 	return j, nil
 }
 
+// Map returns a map[string]interface{} from a Etcd directory.
+func Map(root *etcd.Node) map[string]interface{} {
+	v := make(map[string]interface{})
+
+	for _, n := range root.Nodes {
+		keys := strings.Split(n.Key, "/")
+		k := keys[len(keys)-1]
+		if n.Dir {
+			v[k] = make(map[string]interface{})
+			v[k] = Map(n)
+		} else {
+			v[k] = n.Value
+		}
+	}
+	return v
+}
+
 // CreateStruct creates a Etcd directory based on a struct.
 func CreateStruct(client *etcd.Client, dir string, s interface{}) error {
 	// Yes this is a hack, so what it works.
@@ -70,28 +87,18 @@ func CreateStruct(client *etcd.Client, dir string, s interface{}) error {
 	return CreateMap(client, dir, m)
 }
 
-// Map returns a map[string]interface{} from a Etcd directory.
-func Map(root *etcd.Node) map[string]interface{} {
-	v := make(map[string]interface{})
-
-	for _, n := range root.Nodes {
-		keys := strings.Split(n.Key, "/")
-		k := keys[len(keys)-1]
-		if n.Dir {
-			v[k] = make(map[string]interface{})
-			v[k] = Map(n)
-		} else {
-			v[k] = n.Value
-		}
+// CreateJSON creates a Etcd directory based on JSON byte[].
+func CreateJSON(client *etcd.Client, dir string, j []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(j, &m); err != nil {
+		return err
 	}
-	return v
+
+	return CreateMap(client, dir, m)
 }
 
 // CreateMap creates a Etcd directory based on map[string]interface{}.
 func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error {
-
-	// Check we're a map
-
 	for k, v := range d {
 		if reflect.ValueOf(v).Kind() == reflect.Map {
 			if _, err := client.CreateDir(dir+"/"+k, 0); err != nil {
@@ -114,9 +121,6 @@ func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error 
 
 // CreateMapSlice creates a Etcd directory based on []interface{}.
 func CreateMapSlice(client *etcd.Client, dir string, d []interface{}) error {
-
-	// Check we're a slice
-
 	for i, v := range d {
 		istr := strconv.Itoa(i)
 		if reflect.ValueOf(v).Kind() == reflect.Map {

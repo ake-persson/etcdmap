@@ -7,6 +7,13 @@
 
 
 
+## func CreateJSON
+``` go
+func CreateJSON(client *etcd.Client, dir string, j []byte) error
+```
+CreateJSON creates a Etcd directory based on JSON byte[].
+
+
 ## func CreateMap
 ``` go
 func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error
