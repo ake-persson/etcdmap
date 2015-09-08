@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE='quay.io/coreos/etcd:v0.4.6'
-NAME='etcd-node'
+NAME='etcd'
 
 case $(uname -s) in
     'Darwin')
