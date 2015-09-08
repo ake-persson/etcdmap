@@ -4,10 +4,23 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 
 	etcd "github.com/coreos/go-etcd/etcd"
 	"github.com/mickep76/etcdmap"
 )
+
+func getEnv() []string {
+	for _, e := range os.Environ() {
+		a := strings.Split(e, "=")
+		if a[0] == "ETCD_CONN" {
+			return []string{a[1]}
+		}
+	}
+
+	return []string{}
+}
 
 type User struct {
 	Name      string `json:"username"`
@@ -22,8 +35,8 @@ type Group struct {
 
 func Example() {
 	verbose := flag.Bool("verbose", false, "Verbose")
-	node := flag.String("node", "localhost", "Etcd node")
-	port := flag.String("port", "5001", "Etcd port")
+	node := flag.String("node", "", "Etcd node")
+	port := flag.String("port", "", "Etcd port")
 	flag.Parse()
 
 	// Define nested structure.
@@ -44,11 +57,15 @@ func Example() {
 	}
 
 	// Connect to Etcd.
-	dbo := []string{fmt.Sprintf("http://%v:%v", *node, *port)}
-	if *verbose {
-		log.Printf("Connecting to: %s", dbo)
+	conn := getEnv()
+	if node == nil && port == nil {
+		conn = []string{fmt.Sprintf("http://%v:%v", *node, *port)}
 	}
-	client := etcd.NewClient(dbo)
+
+	if *verbose {
+		log.Printf("Connecting to: %s", conn)
+	}
+	client := etcd.NewClient(conn)
 
 	// Create directory structure based on struct.
 	err := etcdmap.CreateStruct(client, "/example", g)
@@ -84,4 +101,5 @@ func Example() {
 	//            "username": "lnemoy"
 	//        }
 	//    }
+	//}
 }
