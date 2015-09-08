@@ -69,13 +69,22 @@ func main() {
 
 	fmt.Println(string(j))
 
-	// This is not supported yet for nested struct.
-	// Convert Etcd node to struct.
-	/*
-		r := Group{}
-		err2 := etcdmap.Struct(res.Node, &r)
-		if err2 != nil {
-			log.Fatal(err2.Error())
-		}
-	*/
+	// Output:
+	//{
+	//    "groupname": "staff",
+	//    "users": {
+	//        "0": {
+	//            "first_name": "John",
+	//            "last_name": "Doe",
+	//            "username": "jdoe"
+	//        },
+	//        "1": {
+	//            "first_name": "Leonard",
+	//            "last_name": "Nimoy",
+	//            "username": "lnemoy"
+	//        }
+	//    }
+}
+
+
 }
