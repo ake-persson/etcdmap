@@ -79,7 +79,7 @@ func Example() {
 		log.Fatal(err.Error())
 	}
 
-	j, err2 := etcdmap.JSONIndent(res.Node, "    ")
+	j, err2 := etcdmap.JSON(res.Node)
 	if err2 != nil {
 		log.Fatal(err2.Error())
 	}
@@ -87,19 +87,5 @@ func Example() {
 	fmt.Println(string(j))
 
 	// Output:
-	//{
-	//    "groupname": "staff",
-	//    "users": {
-	//        "0": {
-	//            "first_name": "John",
-	//            "last_name": "Doe",
-	//            "username": "jdoe"
-	//        },
-	//        "1": {
-	//            "first_name": "Leonard",
-	//            "last_name": "Nimoy",
-	//            "username": "lnemoy"
-	//        }
-	//    }
-	//}
+	//{"groupname":"staff","users":{"0":{"first_name":"John","last_name":"Doe","username":"jdoe"},"1":{"first_name":"Leonard","last_name":"Nimoy","username":"lnemoy"}}}
 }
