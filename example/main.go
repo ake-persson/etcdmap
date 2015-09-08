@@ -11,13 +11,14 @@ import (
 
 type User struct {
 	Name      string `json:"username"`
+	Alias     string `json:"alias"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 }
 
 type Group struct {
 	Name  string `json:"groupname"`
-	users []User `json:"users"`
+	Users []User `json:"users"`
 }
 
 func main() {
@@ -26,10 +27,23 @@ func main() {
 	port := flag.String("port", "5001", "Etcd port")
 	flag.Parse()
 
-	u := User{
-		Name:      "jdoe",
-		FirstName: "John",
-		LastName:  "Doe",
+	// Define nested structure.
+	g := Group{
+		Name: "staff",
+		Users: []User{
+			User{
+				Name:      "jdoe",
+				Alias:     "Unknown",
+				FirstName: "John",
+				LastName:  "Doe",
+			},
+			User{
+				Name:      "lnemoy",
+				Alias:     "Spock",
+				FirstName: "Leonard",
+				LastName:  "Nimoy",
+			},
+		},
 	}
 
 	// Connect to Etcd.
@@ -40,9 +54,9 @@ func main() {
 	client := etcd.NewClient(dbo)
 
 	// Create directory structure based on struct.
-	err := etcdmap.CreateStruct(client, "/example", &u)
+	err := etcdmap.CreateStruct(client, "/example", g)
 	if err != nil {
-		log.Fatal(err.Error)
+		log.Fatal(err.Error())
 	}
 
 	// Get directory structure from Etcd.
@@ -52,10 +66,10 @@ func main() {
 	}
 
 	// Convert Etcd node to struct.
-	r := User{}
+	r := Group{}
 	err2 := etcdmap.Struct(res.Node, &r)
 	if err2 != nil {
-		log.Fatal(err.Error)
+		log.Fatal(err.Error())
 	}
 
 	fmt.Println(r)
