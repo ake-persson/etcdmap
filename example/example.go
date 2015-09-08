@@ -46,7 +46,7 @@ func main() {
 	// Connect to Etcd.
 	dbo := []string{fmt.Sprintf("http://%v:%v", *node, *port)}
 	if *verbose {
-		log.Printf("Connecting to: %s", node)
+		log.Printf("Connecting to: %s", dbo)
 	}
 	client := etcd.NewClient(dbo)
 
