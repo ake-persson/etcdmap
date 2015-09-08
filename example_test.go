@@ -1,4 +1,4 @@
-package example_test
+package etcdmap_test
 
 import (
 	"flag"
