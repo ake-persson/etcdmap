@@ -7,18 +7,32 @@
 
 
 
+## func CreateMap
+``` go
+func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error
+```
+CreateMap creates a Etcd directory based on map[string]interface{}.
+
+
+## func CreateStruct
+``` go
+func CreateStruct(client *etcd.Client, dir string, s interface{}) error
+```
+CreateStruct creates a Etcd directory based on a struct.
+
+
 ## func Map
 ``` go
 func Map(root *etcd.Node) map[string]interface{}
 ```
-Map creates a map[string]interface{} from a Etcd directory.
+Map returns a map[string]interface{} from a Etcd directory.
 
 
-## func MapCreate
+## func Struct
 ``` go
-func MapCreate(client *etcd.Client, dir string, d map[string]interface{}) error
+func Struct(root *etcd.Node, s interface{}) error
 ```
-MapCreate create Etcd directory structure using a map[string]interface{}.
+Struct returns a struct from a Etcd directory.
 
 
 
