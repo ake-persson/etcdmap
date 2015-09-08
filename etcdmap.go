@@ -11,6 +11,7 @@ import (
 )
 
 // Struct returns a struct from a Etcd directory.
+// !!! This is not supported for nested struct yet.
 func Struct(root *etcd.Node, s interface{}) error {
 	// Convert Etcd node to map[string]interface{}
 	m := Map(root)
