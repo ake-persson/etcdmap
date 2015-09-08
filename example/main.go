@@ -11,7 +11,6 @@ import (
 
 type User struct {
 	Name      string `json:"username"`
-	Alias     string `json:"alias"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 }
@@ -33,13 +32,11 @@ func main() {
 		Users: []User{
 			User{
 				Name:      "jdoe",
-				Alias:     "Unknown",
 				FirstName: "John",
 				LastName:  "Doe",
 			},
 			User{
 				Name:      "lnemoy",
-				Alias:     "Spock",
 				FirstName: "Leonard",
 				LastName:  "Nimoy",
 			},
@@ -60,17 +57,20 @@ func main() {
 	}
 
 	// Get directory structure from Etcd.
-	res, err := client.Get("/example", true, true)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
+	/*
+		res, err := client.Get("/example", true, true)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	*/
 	// Convert Etcd node to struct.
-	r := Group{}
-	err2 := etcdmap.Struct(res.Node, &r)
-	if err2 != nil {
-		log.Fatal(err.Error())
-	}
+	/*
+		r := Group{}
+		err2 := etcdmap.Struct(res.Node, &r)
+		if err2 != nil {
+			log.Fatal(err.Error())
+		}
 
-	fmt.Println(r)
+		fmt.Println(r)
+	*/
 }

@@ -1,7 +1,9 @@
 package etcdmap
 
 import (
+	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"encoding/json"
@@ -69,10 +71,36 @@ func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error 
 				return err
 			}
 			CreateMap(client, dir+"/"+k, v.(map[string]interface{}))
-		} else {
+		} else if reflect.ValueOf(v).Kind() == reflect.Slice {
+			CreateMapSlice(client, dir+"/"+k, v.([]interface{}))
+		} else if reflect.ValueOf(v).Kind() == reflect.String {
 			if _, err := client.Set(dir+"/"+k, v.(string), 0); err != nil {
 				return err
 			}
+		} else {
+			return fmt.Errorf("unsupported type: %s for key: %s", reflect.ValueOf(v).Kind(), k)
+		}
+	}
+
+	return nil
+}
+
+func CreateMapSlice(client *etcd.Client, dir string, d []interface{}) error {
+	for i, v := range d {
+		istr := strconv.Itoa(i)
+		if reflect.ValueOf(v).Kind() == reflect.Map {
+			if _, err := client.CreateDir(dir+"/"+istr, 0); err != nil {
+				return err
+			}
+			CreateMap(client, dir+"/"+istr, v.(map[string]interface{}))
+		} else if reflect.ValueOf(v).Kind() == reflect.Slice {
+			CreateMapSlice(client, dir+"/"+istr, v.([]interface{}))
+		} else if reflect.ValueOf(v).Kind() == reflect.String {
+			if _, err := client.Set(dir+"/"+istr, v.(string), 0); err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("unsupported type: %s for key: %d", reflect.ValueOf(v).Kind(), i)
 		}
 	}
 
