@@ -14,11 +14,32 @@ func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error
 CreateMap creates a Etcd directory based on map[string]interface{}.
 
 
+## func CreateMapSlice
+``` go
+func CreateMapSlice(client *etcd.Client, dir string, d []interface{}) error
+```
+CreateMapSlice creates a Etcd directory based on []interface{}.
+
+
 ## func CreateStruct
 ``` go
 func CreateStruct(client *etcd.Client, dir string, s interface{}) error
 ```
 CreateStruct creates a Etcd directory based on a struct.
+
+
+## func JSON
+``` go
+func JSON(root *etcd.Node) ([]byte, error)
+```
+JSON returns an Etcd directory as JSON []byte.
+
+
+## func JSONIndent
+``` go
+func JSONIndent(root *etcd.Node, indent string) ([]byte, error)
+```
+JSONIndent returns an Etcd directory as indented JSON []byte.
 
 
 ## func Map

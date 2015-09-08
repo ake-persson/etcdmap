@@ -15,12 +15,14 @@ func Struct(root *etcd.Node, s interface{}) error {
 	// Convert Etcd node to map[string]interface{}
 	m := Map(root)
 
+	// Yes this is a hack, so what it works.
 	// Marshal map[string]interface{} to JSON.
 	j, err := json.Marshal(&m)
 	if err != nil {
 		return err
 	}
 
+	// Yes this is a hack, so what it works.
 	// Unmarshal JSON to struct.
 	if err := json.Unmarshal(j, &s); err != nil {
 		return err
@@ -29,14 +31,36 @@ func Struct(root *etcd.Node, s interface{}) error {
 	return nil
 }
 
+// JSON returns an Etcd directory as JSON []byte.
+func JSON(root *etcd.Node) ([]byte, error) {
+	j, err := json.Marshal(Map(root))
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return j, nil
+}
+
+// JSONIndent returns an Etcd directory as indented JSON []byte.
+func JSONIndent(root *etcd.Node, indent string) ([]byte, error) {
+	j, err := json.MarshalIndent(Map(root), "", indent)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return j, nil
+}
+
 // CreateStruct creates a Etcd directory based on a struct.
 func CreateStruct(client *etcd.Client, dir string, s interface{}) error {
+	// Yes this is a hack, so what it works.
 	// Marshal struct to JSON
 	j, err := json.Marshal(&s)
 	if err != nil {
 		return err
 	}
 
+	// Yes this is a hack, so what it works.
 	// Unmarshal JSON to map[string]interface{}
 	m := make(map[string]interface{})
 	if err := json.Unmarshal(j, &m); err != nil {
@@ -65,6 +89,9 @@ func Map(root *etcd.Node) map[string]interface{} {
 
 // CreateMap creates a Etcd directory based on map[string]interface{}.
 func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error {
+
+	// Check we're a map
+
 	for k, v := range d {
 		if reflect.ValueOf(v).Kind() == reflect.Map {
 			if _, err := client.CreateDir(dir+"/"+k, 0); err != nil {
@@ -85,7 +112,11 @@ func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error 
 	return nil
 }
 
+// CreateMapSlice creates a Etcd directory based on []interface{}.
 func CreateMapSlice(client *etcd.Client, dir string, d []interface{}) error {
+
+	// Check we're a slice
+
 	for i, v := range d {
 		istr := strconv.Itoa(i)
 		if reflect.ValueOf(v).Kind() == reflect.Map {
