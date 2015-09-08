@@ -67,6 +67,6 @@ case ${CMD} in
 
 	;;
     *)
-        echo "Usage: $0 {start|stop|restart|status}"
+        echo "Usage: $0 {start|stop|restart|status|env}"
         ;;
 esac
