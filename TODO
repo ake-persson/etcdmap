@@ -1,2 +1,0 @@
-- Nested structures doesn't work with Etcd, since it doesn't have a concept of a list only nested key values
-  + Possible workaround is assigning an index
