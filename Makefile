@@ -6,7 +6,6 @@ format:
 syntax: format
 	golint .
 	go vet .
-	go build
 
 test: syntax
 	go test

@@ -1,6 +1,6 @@
 # EtcdMap
 
-Go package to interact with Etcd using struct, map or JSON.
+Go package provides methods for interacting with Etcd using struct, map or JSON.
 
 [![GoDoc](https://godoc.org/github.com/mickep76/etcdmap?status.svg)](https://godoc.org/github.com/mickep76/etcdmap)
 
@@ -9,6 +9,8 @@ Go package to interact with Etcd using struct, map or JSON.
 
 # etcdmap
     import "github.com/mickep76/etcdmap"
+
+Package etcdmap provides methods for interacting with Etcd using struct, map or JSON.
 
 
 

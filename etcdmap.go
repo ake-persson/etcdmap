@@ -1,3 +1,4 @@
+// Package etcdmap provides methods for interacting with Etcd using struct, map or JSON.
 package etcdmap
 
 import (
