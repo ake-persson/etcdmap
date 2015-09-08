@@ -20,7 +20,7 @@ type Group struct {
 	Users []User `json:"users"`
 }
 
-func main() {
+func Example() {
 	verbose := flag.Bool("verbose", false, "Verbose")
 	node := flag.String("node", "localhost", "Etcd node")
 	port := flag.String("port", "5001", "Etcd port")
