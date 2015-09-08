@@ -1,3 +1,11 @@
+# EtcdMap
+
+Go package to interact with Etcd using struct, map or JSON.
+
+[![GoDoc](https://godoc.org/github.com/mickep76/etcdmap?status.svg)](https://godoc.org/github.com/mickep76/etcdmap)
+
+# Documentation
+
 
 # etcdmap
     import "github.com/mickep76/etcdmap"
@@ -61,6 +69,7 @@ Map returns a map[string]interface{} from a Etcd directory.
 func Struct(root *etcd.Node, s interface{}) error
 ```
 Struct returns a struct from a Etcd directory.
+!!! This is not supported for nested struct yet.
 
 
 
