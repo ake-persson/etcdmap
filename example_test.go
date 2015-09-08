@@ -33,9 +33,6 @@ type Group struct {
 	Users []User `json:"users"`
 }
 
-// ExampleSortKeys demonstrates a technique for sorting a struct type using programmable sort criteria.
-    64	func Example_sortKeys() {
-
 // ExampleNestedStruct creates a Etcd directory using a nested Go struct and then gets the directory as JSON.
 func Example_nestedStruct() {
 	verbose := flag.Bool("verbose", false, "Verbose")
