@@ -17,25 +17,18 @@ Package etcdmap provides methods for interacting with Etcd using struct, map or 
 
 
 
+## func Create
+``` go
+func Create(client *etcd.Client, path string, d interface{}) error
+```
+Create Etcd directory from a map, slice or struct.
+
+
 ## func CreateJSON
 ``` go
 func CreateJSON(client *etcd.Client, dir string, j []byte) error
 ```
 CreateJSON creates a Etcd directory based on JSON byte[].
-
-
-## func CreateMap
-``` go
-func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error
-```
-CreateMap creates a Etcd directory based on map[string]interface{}.
-
-
-## func CreateMapSlice
-``` go
-func CreateMapSlice(client *etcd.Client, dir string, d []interface{}) error
-```
-CreateMapSlice creates a Etcd directory based on []interface{}.
 
 
 ## func CreateStruct
