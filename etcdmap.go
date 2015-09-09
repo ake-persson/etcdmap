@@ -83,7 +83,7 @@ func Create(client *etcd.Client, path string, val reflect.Value) error {
 	case reflect.Map:
 		for _, k := range val.MapKeys() {
 			v := val.MapIndex(k)
-			if err := Create(client, path+"/"+k.String(), v); err != nil {
+			if err := Create(client, path+"/"+k.String(), reflect.ValueOf(v)); err != nil {
 				return err
 			}
 		}
