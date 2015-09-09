@@ -21,7 +21,7 @@ Package etcdmap provides methods for interacting with Etcd using struct, map or 
 ``` go
 func Create(client *etcd.Client, path string, val reflect.Value) error
 ```
-Create Etcd directory from a map, slice or struct.
+Create Etcd directory structure from a map, slice or struct.
 
 
 ## func JSON
