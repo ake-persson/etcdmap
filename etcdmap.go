@@ -4,12 +4,13 @@ package etcdmap
 import (
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"encoding/json"
 	"github.com/coreos/go-etcd/etcd"
 )
+
+var typeOfBytes = reflect.TypeOf([]byte(nil))
 
 // Struct returns a struct from a Etcd directory.
 // !!! This is not supported for nested struct yet.
@@ -86,7 +87,7 @@ func CreateStruct(client *etcd.Client, dir string, s interface{}) error {
 		return err
 	}
 
-	return CreateMap(client, dir, m)
+	return Create(client, dir, m)
 }
 
 // CreateJSON creates a Etcd directory based on JSON byte[].
@@ -96,49 +97,38 @@ func CreateJSON(client *etcd.Client, dir string, j []byte) error {
 		return err
 	}
 
-	return CreateMap(client, dir, m)
+	return Create(client, dir, m)
 }
 
-// CreateMap creates a Etcd directory based on map[string]interface{}.
-func CreateMap(client *etcd.Client, dir string, d map[string]interface{}) error {
-	for k, v := range d {
-		if reflect.ValueOf(v).Kind() == reflect.Map {
-			if _, err := client.CreateDir(dir+"/"+k, 0); err != nil {
-				return err
-			}
-			CreateMap(client, dir+"/"+k, v.(map[string]interface{}))
-		} else if reflect.ValueOf(v).Kind() == reflect.Slice {
-			CreateMapSlice(client, dir+"/"+k, v.([]interface{}))
-		} else if reflect.ValueOf(v).Kind() == reflect.String {
-			if _, err := client.Set(dir+"/"+k, v.(string), 0); err != nil {
+// Create Etcd directory from a map, slice or struct.
+func Create(client *etcd.Client, path string, d interface{}) error {
+	//	fmt.Printf("## %s : %s : %s\n", path, reflect.ValueOf(d).Kind(), reflect.ValueOf(d).Type())
+
+	switch reflect.ValueOf(d).Kind() {
+	case reflect.Map:
+		for k, v := range d.(map[string]interface{}) {
+			Create(client, path+"/"+k, v)
+		}
+	case reflect.Slice:
+		if reflect.ValueOf(d).Type() == typeOfBytes {
+			if _, err := client.Set(path, string(d.([]byte)), 0); err != nil {
 				return err
 			}
 		} else {
-			return fmt.Errorf("unsupported type: %s for key: %s", reflect.ValueOf(v).Kind(), k)
-		}
-	}
-
-	return nil
-}
-
-// CreateMapSlice creates a Etcd directory based on []interface{}.
-func CreateMapSlice(client *etcd.Client, dir string, d []interface{}) error {
-	for i, v := range d {
-		istr := strconv.Itoa(i)
-		if reflect.ValueOf(v).Kind() == reflect.Map {
-			if _, err := client.CreateDir(dir+"/"+istr, 0); err != nil {
-				return err
+			for i, v := range d.([]interface{}) {
+				Create(client, fmt.Sprintf("%s/%d", path, i), v)
 			}
-			CreateMap(client, dir+"/"+istr, v.(map[string]interface{}))
-		} else if reflect.ValueOf(v).Kind() == reflect.Slice {
-			CreateMapSlice(client, dir+"/"+istr, v.([]interface{}))
-		} else if reflect.ValueOf(v).Kind() == reflect.String {
-			if _, err := client.Set(dir+"/"+istr, v.(string), 0); err != nil {
-				return err
-			}
-		} else {
-			return fmt.Errorf("unsupported type: %s for key: %d", reflect.ValueOf(v).Kind(), i)
 		}
+	case reflect.String:
+		if _, err := client.Set(path, d.(string), 0); err != nil {
+			return err
+		}
+	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
+		if _, err := client.Set(path, fmt.Sprintf("%v", d), 0); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("unsupported type: %s for path: %s", reflect.ValueOf(d).Kind(), path)
 	}
 
 	return nil
