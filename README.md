@@ -24,6 +24,13 @@ func Create(client *etcd.Client, path string, val reflect.Value) error
 Create Etcd directory structure from a map, slice or struct.
 
 
+## func CreateJSON
+``` go
+func CreateJSON(client *etcd.Client, dir string, j []byte) error
+```
+CreateJSON Etcd directory structure from JSON.
+
+
 ## func JSON
 ``` go
 func JSON(root *etcd.Node) ([]byte, error)

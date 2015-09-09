@@ -10,8 +10,6 @@ import (
 	"github.com/coreos/go-etcd/etcd"
 )
 
-var typeOfBytes = reflect.TypeOf([]byte(nil))
-
 // Struct returns a struct from a Etcd directory.
 // !!! This is not supported for nested struct yet.
 func Struct(root *etcd.Node, s interface{}) error {
@@ -107,4 +105,14 @@ func Create(client *etcd.Client, path string, val reflect.Value) error {
 	}
 
 	return nil
+}
+
+// CreateJSON Etcd directory structure from JSON.
+func CreateJSON(client *etcd.Client, dir string, j []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(j, &m); err != nil {
+		return err
+	}
+
+	return Create(client, dir, reflect.ValueOf(m))
 }
