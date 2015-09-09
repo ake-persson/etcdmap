@@ -71,64 +71,38 @@ func Map(root *etcd.Node) map[string]interface{} {
 	return v
 }
 
-// CreateStruct creates a Etcd directory based on a struct.
-func CreateStruct(client *etcd.Client, dir string, s interface{}) error {
-	// Yes this is a hack, so what it works.
-	// Marshal struct to JSON
-	j, err := json.Marshal(&s)
-	if err != nil {
-		return err
-	}
-
-	// Yes this is a hack, so what it works.
-	// Unmarshal JSON to map[string]interface{}
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(j, &m); err != nil {
-		return err
-	}
-
-	return Create(client, dir, m)
-}
-
-// CreateJSON creates a Etcd directory based on JSON byte[].
-func CreateJSON(client *etcd.Client, dir string, j []byte) error {
-	m := make(map[string]interface{})
-	if err := json.Unmarshal(j, &m); err != nil {
-		return err
-	}
-
-	return Create(client, dir, m)
-}
-
 // Create Etcd directory from a map, slice or struct.
-func Create(client *etcd.Client, path string, d interface{}) error {
-	//	fmt.Printf("## %s : %s : %s\n", path, reflect.ValueOf(d).Kind(), reflect.ValueOf(d).Type())
+func Create(client *etcd.Client, path string, val reflect.Value) error {
 
-	switch reflect.ValueOf(d).Kind() {
+	switch val.Kind() {
+	case reflect.Struct:
+		for i := 0; i < val.NumField(); i++ {
+			t := val.Type().Field(i)
+			k := t.Tag.Get("etcd")
+			//			fmt.Printf("### %s: %s : %s : %s\n", path, k, v.Kind(), v.Type())
+			Create(client, path+"/"+k, val.Field(i))
+		}
 	case reflect.Map:
-		for k, v := range d.(map[string]interface{}) {
-			Create(client, path+"/"+k, v)
+		for _, k := range val.MapKeys() {
+			v := val.MapIndex(k)
+			Create(client, path+"/"+k.String(), v)
 		}
 	case reflect.Slice:
-		if reflect.ValueOf(d).Type() == typeOfBytes {
-			if _, err := client.Set(path, string(d.([]byte)), 0); err != nil {
-				return err
-			}
-		} else {
-			for i, v := range d.([]interface{}) {
-				Create(client, fmt.Sprintf("%s/%d", path, i), v)
-			}
+		for i := 0; i < val.Len(); i++ {
+			Create(client, fmt.Sprintf("%s/%d", path, i), val.Index(i))
 		}
 	case reflect.String:
-		if _, err := client.Set(path, d.(string), 0); err != nil {
+		if _, err := client.Set(path, val.String(), 0); err != nil {
 			return err
 		}
-	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
-		if _, err := client.Set(path, fmt.Sprintf("%v", d), 0); err != nil {
-			return err
-		}
+		/*
+			case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
+				if _, err := client.Set(path, fmt.Sprintf("%v", d), 0); err != nil {
+					return err
+				}
+		*/
 	default:
-		return fmt.Errorf("unsupported type: %s for path: %s", reflect.ValueOf(d).Kind(), path)
+		return fmt.Errorf("unsupported type: %s for path: %s", val.Kind(), path)
 	}
 
 	return nil
