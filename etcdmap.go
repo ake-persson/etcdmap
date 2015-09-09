@@ -94,7 +94,8 @@ func Create(client *etcd.Client, path string, val reflect.Value) error {
 		if _, err := client.Set(path, val.String(), 0); err != nil {
 			return err
 		}
-	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
+	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
 		if _, err := client.Set(path, fmt.Sprintf("%v", val.Interface()), 0); err != nil {
 			return err
 		}
