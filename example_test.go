@@ -114,19 +114,21 @@ func Example_nestedStruct() {
 	fmt.Println(string(j))
 
 	// Get directory structure from Etcd.
-	res, err5 := kapi.Get(context.TODO(), "/example/users/0", &etcd.GetOptions{Recursive: true})
-	if err5 != nil {
-		log.Fatal(err5.Error())
-	}
+	/*
+		res, err5 := kapi.Get(context.TODO(), "/example/users/0", &etcd.GetOptions{Recursive: true})
+		if err5 != nil {
+			log.Fatal(err5.Error())
+		}
 
-	s := User{}
-	err6 := etcdmap.Struct(res.Node, reflect.ValueOf(&s))
-	if err6 != nil {
-		log.Fatal(err6.Error())
-	}
+		s := User{}
+		err6 := etcdmap.Struct(res.Node, reflect.ValueOf(&s))
+		if err6 != nil {
+			log.Fatal(err6.Error())
+		}
 
-	fmt.Println(s)
+		fmt.Println(s)
+	*/
 
 	// Output:
-	//{"id":"staff","users":{"0":{"age":"25","first_name":"John","id":"jdoe","last_name":"Doe","male":"true"},"1":{"age":"62","first_name":"Leonard","id":"lnemoy","last_name":"Nimoy","male":"true"}}}
+	//{"name":"staff","users":{"0":{"age":"25","first_name":"John","last_name":"Doe","male":"true","name":"jdoe"},"1":{"age":"62","first_name":"Leonard","last_name":"Nimoy","male":"true","name":"lnemoy"}}}
 }

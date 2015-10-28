@@ -142,7 +142,7 @@ func Struct(root *client.Node, val reflect.Value) error {
 				}
 				f.Set(i)
 			default:
-				return fmt.Errorf("entry type is not supported key: %s value: %s", k, v)
+				return fmt.Errorf("unsupported type: %s for key: %s", f.Type().Kind(), k)
 			}
 		}
 	}
