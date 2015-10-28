@@ -5,31 +5,147 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
 	"github.com/coreos/etcd/client"
 )
 
-// Struct returns a struct from a etcd directory.
-// !!! This is not supported for nested struct yet.
-func Struct(root *client.Node, s interface{}) error {
-	// Convert etcd node to map[string]interface{}
+func strToInt(v string, k reflect.Kind) (reflect.Value, error) {
+	switch k {
+	case reflect.Int:
+		i, err := strconv.ParseInt(v, 10, 0)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(int(i)), nil
+	case reflect.Int8:
+		i, err := strconv.ParseInt(v, 10, 8)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(int8(i)), nil
+	case reflect.Int16:
+		i, err := strconv.ParseInt(v, 10, 16)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(int16(i)), nil
+	case reflect.Int32:
+		i, err := strconv.ParseInt(v, 10, 32)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(int32(i)), nil
+	case reflect.Int64:
+		i, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(int64(i)), nil
+	}
+
+	return reflect.Value{}, fmt.Errorf("unsupported type: %s", k)
+}
+
+func strToUint(v string, k reflect.Kind) (reflect.Value, error) {
+	switch k {
+	case reflect.Uint:
+		i, err := strconv.ParseUint(v, 10, 0)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(uint(i)), nil
+	case reflect.Uint8:
+		i, err := strconv.ParseUint(v, 10, 8)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(uint8(i)), nil
+	case reflect.Uint16:
+		i, err := strconv.ParseUint(v, 10, 16)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(uint16(i)), nil
+	case reflect.Uint32:
+		i, err := strconv.ParseUint(v, 10, 32)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(uint32(i)), nil
+	case reflect.Uint64:
+		i, err := strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(uint64(i)), nil
+	}
+
+	return reflect.Value{}, fmt.Errorf("unsupported type: %s", k)
+}
+
+func strToFloat(v string, k reflect.Kind) (reflect.Value, error) {
+	switch k {
+	case reflect.Float32:
+		i, err := strconv.ParseFloat(v, 32)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(float32(i)), nil
+	case reflect.Float64:
+		i, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(float64(i)), nil
+	}
+
+	return reflect.Value{}, fmt.Errorf("unsupported type: %s", k)
+}
+
+func Struct(root *client.Node, val reflect.Value) error {
 	m := Map(root)
+	s := val.Elem()
 
-	// Yes this is a hack, so what it works.
-	// Marshal map[string]interface{} to JSON.
-	j, err := json.Marshal(&m)
-	if err != nil {
-		return err
+	for i := 0; i < s.NumField(); i++ {
+		t := s.Type().Field(i)
+		k := t.Tag.Get("etcd")
+		if v, ok := m[k]; ok {
+			f := s.Field(i)
+			switch f.Type().Kind() {
+			case reflect.String:
+				f.Set(reflect.ValueOf(v))
+			case reflect.Bool:
+				i, err := strconv.ParseBool(v.(string))
+				if err != nil {
+					return err
+				}
+				f.SetBool(i)
+			case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
+				i, err := strToInt(v.(string), f.Type().Kind())
+				if err != nil {
+					return err
+				}
+				f.Set(i)
+			case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				i, err := strToUint(v.(string), f.Type().Kind())
+				if err != nil {
+					return err
+				}
+				f.Set(i)
+			case reflect.Float32, reflect.Float64:
+				i, err := strToFloat(v.(string), f.Type().Kind())
+				if err != nil {
+					return err
+				}
+				f.Set(i)
+			default:
+				return fmt.Errorf("entry type is not supported key: %s value: %s", k, v)
+			}
+		}
 	}
-
-	// Yes this is a hack, so what it works.
-	// Unmarshal JSON to struct.
-	if err := json.Unmarshal(j, &s); err != nil {
-		return err
-	}
-
 	return nil
 }
 

@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	//	etcd "github.com/coreos/go-etcd/etcd"
 	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
 	etcd "github.com/coreos/etcd/client"
 	"github.com/mickep76/etcdmap"
@@ -22,7 +21,7 @@ type Env struct {
 
 // User structure.
 type User struct {
-	Name      string `json:"username" etcd:"id"`
+	Name      string `json:"username" etcd:"name"`
 	Age       int    `json:"age" etcd:"age"`
 	Male      bool   `json:"male" etcd:"male"`
 	FirstName string `json:"first_name" etcd:"first_name"`
@@ -31,7 +30,7 @@ type User struct {
 
 // Group structure.
 type Group struct {
-	Name  string `json:"groupname" etcd:"id"`
+	Name  string `json:"groupname" etcd:"name"`
 	Users []User `json:"users" etcd:"users"`
 }
 
@@ -93,15 +92,16 @@ func Example_nestedStruct() {
 		log.Fatal(err)
 	}
 
+	kapi := etcd.NewKeysAPI(client)
+
 	// Create directory structure based on struct.
-	err2 := etcdmap.Create(&client, "/example", reflect.ValueOf(g))
+	err2 := etcdmap.Create(kapi, "/example", reflect.ValueOf(g))
 	if err2 != nil {
 		log.Fatal(err2.Error())
 	}
 
 	// Get directory structure from Etcd.
-	kapi := etcd.NewKeysAPI(client)
-	res, err3 := kapi.Get(context.Background(), "/example", &etcd.GetOptions{Recursive: true})
+	res, err3 := kapi.Get(context.TODO(), "/example", &etcd.GetOptions{Recursive: true})
 	if err3 != nil {
 		log.Fatal(err3.Error())
 	}
@@ -112,6 +112,20 @@ func Example_nestedStruct() {
 	}
 
 	fmt.Println(string(j))
+
+	// Get directory structure from Etcd.
+	res, err5 := kapi.Get(context.TODO(), "/example/users/0", &etcd.GetOptions{Recursive: true})
+	if err5 != nil {
+		log.Fatal(err5.Error())
+	}
+
+	s := User{}
+	err6 := etcdmap.Struct(res.Node, reflect.ValueOf(&s))
+	if err6 != nil {
+		log.Fatal(err6.Error())
+	}
+
+	fmt.Println(s)
 
 	// Output:
 	//{"id":"staff","users":{"0":{"age":"25","first_name":"John","id":"jdoe","last_name":"Doe","male":"true"},"1":{"age":"62","first_name":"Leonard","id":"lnemoy","last_name":"Nimoy","male":"true"}}}
