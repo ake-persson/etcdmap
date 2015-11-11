@@ -190,6 +190,9 @@ func Map(root *client.Node) map[string]interface{} {
 
 // Create etcd directory structure from a map, slice or struct.
 func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
+	if strings.HasPrefix(pathx.Base(path), "_") {
+		log.Printf("creating hidden key in etcd: %s", path)
+	}
 	switch val.Kind() {
 	case reflect.Ptr:
 		orig := val.Elem()
@@ -224,18 +227,12 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 			Create(kapi, fmt.Sprintf("%s/%d", path, i), val.Index(i))
 		}
 	case reflect.String:
-		if strings.HasPrefix(pathx.Base(path), "_") {
-			log.Printf("creating hidden key in etcd: %s", path)
-		}
 		_, err := kapi.Set(context.TODO(), path, val.String(), nil)
 		if err != nil {
 			return err
 		}
 	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
-		if strings.HasPrefix(pathx.Base(path), "_") {
-			log.Printf("creating hidden key in etcd: %s", path)
-		}
 		_, err := kapi.Set(context.TODO(), path, fmt.Sprintf("%v", val.Interface()), nil)
 		if err != nil {
 			return err
