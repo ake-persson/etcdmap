@@ -213,11 +213,11 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 			}
 		}
 	case reflect.Map:
+		if strings.HasPrefix(pathx.Base(path), "_") {
+			log.Printf("create hidden directory in etcd: %s", path)
+		}
 		for _, k := range val.MapKeys() {
 			v := val.MapIndex(k)
-			if strings.HasPrefix(pathx.Base(path), "_") {
-				log.Printf("create hidden directory in etcd: %s", path)
-			}
 			if err := Create(kapi, path+"/"+k.String(), v); err != nil {
 				return err
 			}
