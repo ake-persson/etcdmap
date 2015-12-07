@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
+	"crypto/sha256"
 	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/coreos/etcd/client"
 )
 
 func strToInt(v string, k reflect.Kind) (reflect.Value, error) {
@@ -209,7 +209,7 @@ func Map(root *client.Node) map[string]interface{} {
 }
 
 // Array returns a []interface{} including the directory name inside each entry from a etcd directory.
-func Array(root *client.Node, depth int) []interface{} {
+func Array(root *client.Node) []interface{} {
 	v := []interface{}{}
 
 	for _, n := range root.Nodes {
@@ -218,7 +218,7 @@ func Array(root *client.Node, depth int) []interface{} {
 		if n.Dir {
 			m := make(map[string]interface{})
 			m = Map(n)
-			m["dirname"] = k
+			m["dir_name"] = k
 		}
 	}
 	return v
