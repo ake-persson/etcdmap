@@ -19,7 +19,7 @@ Package etcdmap provides methods for interacting with etcd using struct, map or 
 
 ## func Array
 ``` go
-func Array(root *client.Node, depth int) []interface{}
+func Array(root *client.Node) []interface{}
 ```
 Array returns a []interface{} including the directory name inside each entry from a etcd directory.
 
