@@ -212,6 +212,10 @@ func Map(root *client.Node) map[string]interface{} {
 func Array(root *client.Node, dirName string) []interface{} {
 	v := []interface{}{}
 
+	if dirName == "" {
+		dirName = "dir"
+	}
+
 	for _, n := range root.Nodes {
 		keys := strings.Split(n.Key, "/")
 		k := keys[len(keys)-1]
