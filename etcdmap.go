@@ -219,6 +219,7 @@ func Array(root *client.Node) []interface{} {
 			m := make(map[string]interface{})
 			m = Map(n)
 			m["dir_name"] = k
+			v = append(v, m)
 		}
 	}
 	return v
