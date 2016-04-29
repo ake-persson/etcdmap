@@ -249,7 +249,11 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 		for i := 0; i < val.NumField(); i++ {
 			t := val.Type().Field(i)
 			k := t.Tag.Get("etcd")
-			if err := Create(kapi, path+"/"+k, val.Field(i)); err != nil {
+			dir := path + "/" + k
+			if _, err := kapi.Set(context.TODO(), dir, "", &client.SetOptions{Dir: true}); err != nil {
+				return err
+			}
+			if err := Create(kapi, dir, val.Field(i)); err != nil {
 				return err
 			}
 		}
@@ -259,13 +263,21 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 		}
 		for _, k := range val.MapKeys() {
 			v := val.MapIndex(k)
-			if err := Create(kapi, path+"/"+k.String(), v); err != nil {
+			dir := path + "/" + k.String()
+			if _, err := kapi.Set(context.TODO(), dir, "", &client.SetOptions{Dir: true}); err != nil {
+				return err
+			}
+			if err := Create(kapi, dir, v); err != nil {
 				return err
 			}
 		}
 	case reflect.Slice:
 		for i := 0; i < val.Len(); i++ {
-			Create(kapi, fmt.Sprintf("%s/%d", path, i), val.Index(i))
+			dir = fmt.Sprintf("%s/%d", path, i)
+			if _, err := kapi.Set(context.TODO(), dir, "", &client.SetOptions{Dir: true}); err != nil {
+				return err
+			}
+			Create(kapi, dir, val.Index(i))
 		}
 	case reflect.String:
 		if strings.HasPrefix(pathx.Base(path), "_") {
