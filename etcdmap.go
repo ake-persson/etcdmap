@@ -261,7 +261,9 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 			return err
 		}
 	case reflect.Struct:
-		createDir(kapi, path)
+		if err := createDir(kapi, path); err != nil {
+			return err
+		}
 		for i := 0; i < val.NumField(); i++ {
 			t := val.Type().Field(i)
 			k := t.Tag.Get("etcd")
@@ -273,7 +275,9 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 		if strings.HasPrefix(pathx.Base(path), "_") {
 			log.Printf("create hidden directory in etcd: %s", path)
 		}
-		createDir(kapi, path)
+		if err := createDir(kapi, path); err != nil {
+			return err
+		}
 		for _, k := range val.MapKeys() {
 			v := val.MapIndex(k)
 			if err := Create(kapi, path+"/"+k.String(), v); err != nil {
@@ -281,9 +285,13 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 			}
 		}
 	case reflect.Slice:
-		createDir(kapi, path)
+		if err := createDir(kapi, path); err != nil {
+			return err
+		}
 		for i := 0; i < val.Len(); i++ {
-			Create(kapi, fmt.Sprintf("%s/%d", path, i), val.Index(i))
+			if err := Create(kapi, fmt.Sprintf("%s/%d", path, i), val.Index(i)); err != nil {
+				return err
+			}
 		}
 	case reflect.String:
 		if strings.HasPrefix(pathx.Base(path), "_") {
