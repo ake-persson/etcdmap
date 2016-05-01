@@ -229,6 +229,21 @@ func Array(root *client.Node, dirName string) []interface{} {
 	return v
 }
 
+// createDir will create path if it doesn't exist and is not root.
+func createDir(kapi client.KeysAPI, path string) error {
+	if path != "/" {
+		if _, err := kapi.Set(context.TODO(), path, "", &client.SetOptions{Dir: true, PrevExist: client.PrevNoExist}); err != nil {
+			if etcdErr, ok := err.(client.Error); ok {
+				if etcdErr.Code == client.ErrorCodeNodeExist {
+					return nil
+				}
+			}
+			return err
+		}
+	}
+	return nil
+}
+
 // Create etcd directory structure from a map, slice or struct.
 func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 	switch val.Kind() {
@@ -246,6 +261,7 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 			return err
 		}
 	case reflect.Struct:
+		createDir(kapi, path)
 		for i := 0; i < val.NumField(); i++ {
 			t := val.Type().Field(i)
 			k := t.Tag.Get("etcd")
@@ -257,6 +273,7 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 		if strings.HasPrefix(pathx.Base(path), "_") {
 			log.Printf("create hidden directory in etcd: %s", path)
 		}
+		createDir(kapi, path)
 		for _, k := range val.MapKeys() {
 			v := val.MapIndex(k)
 			if err := Create(kapi, path+"/"+k.String(), v); err != nil {
@@ -264,6 +281,7 @@ func Create(kapi client.KeysAPI, path string, val reflect.Value) error {
 			}
 		}
 	case reflect.Slice:
+		createDir(kapi, path)
 		for i := 0; i < val.Len(); i++ {
 			Create(kapi, fmt.Sprintf("%s/%d", path, i), val.Index(i))
 		}
